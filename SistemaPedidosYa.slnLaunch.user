@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "SistemaPedidosYa\\SistemaPedidosYa.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "PedidosForm\\PedidosForm.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
