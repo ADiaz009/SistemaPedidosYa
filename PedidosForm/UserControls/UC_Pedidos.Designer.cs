@@ -52,10 +52,12 @@
             // dgvPedidos
             // 
             dgvPedidos.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvPedidos.Location = new Point(291, 3);
+            dgvPedidos.Dock = DockStyle.Fill;
+            dgvPedidos.Location = new Point(0, 0);
             dgvPedidos.Name = "dgvPedidos";
-            dgvPedidos.Size = new Size(451, 363);
+            dgvPedidos.Size = new Size(742, 366);
             dgvPedidos.TabIndex = 0;
+            dgvPedidos.CellClick += dgvPedidos_CellClick_1;
             // 
             // label1
             // 
@@ -128,9 +130,10 @@
             groupBox1.Controls.Add(label3);
             groupBox1.Controls.Add(label2);
             groupBox1.Controls.Add(label1);
-            groupBox1.Location = new Point(3, 3);
+            groupBox1.Dock = DockStyle.Left;
+            groupBox1.Location = new Point(0, 0);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(290, 360);
+            groupBox1.Size = new Size(290, 366);
             groupBox1.TabIndex = 9;
             groupBox1.TabStop = false;
             // 
@@ -204,6 +207,7 @@
             // 
             // cmbEstado
             // 
+            cmbEstado.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbEstado.FormattingEnabled = true;
             cmbEstado.Location = new Point(158, 141);
             cmbEstado.Name = "cmbEstado";

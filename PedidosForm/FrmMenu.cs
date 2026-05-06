@@ -1,14 +1,5 @@
 ﻿using PedidosForm.UserControls;
 using SistemaPedidosYa.WinForms.Utils;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace PedidosForm
 {
@@ -40,15 +31,15 @@ namespace PedidosForm
 
             // Lo mandamos a llamar al panel central
             AbrirPanelHijo(ucPedidos);
-            
+
         }
 
         private void btnInventario_Click(object sender, EventArgs e)
         {
-            if (Sesion.UsuarioActual.Rol == "Administrador")
+            if (Sesion.UsuarioActual!.Rol == "Administrador")
             {
                 AbrirPanelHijo(new UC_Inventario());
-              
+
             }
             else
             {
@@ -59,7 +50,21 @@ namespace PedidosForm
 
         private void btnCerrarSesion_Click(object sender, EventArgs e)
         {
+            var confirm = MessageBox.Show(
+                "¿Seguro que desea cerrar sesión?",
+                "Cerrar sesión",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
 
+            if (confirm == DialogResult.Yes)
+            {
+                Sesion.UsuarioActual = null;
+
+                FrmLogin login = new FrmLogin();
+                login.Show();
+
+                this.Close();
+            }
         }
     }
 }

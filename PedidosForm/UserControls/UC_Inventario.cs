@@ -1,20 +1,11 @@
 ﻿using SistemaPedidosYa.WinForms.Models;
 using SistemaPedidosYa.WinForms.Services;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace PedidosForm.UserControls
 {
     public partial class UC_Inventario : UserControl
     {
+        private string _imagenBase64 = "";
         private readonly ProductoService _productoService = new ProductoService();
         private Guid _idProductoSeleccionado = Guid.Empty;
         public UC_Inventario()
@@ -50,18 +41,36 @@ namespace PedidosForm.UserControls
                 MessageBox.Show($"Error al actualizar la tabla: {ex.Message}");
             }
         }
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
                 var fila = dgvInventario.Rows[e.RowIndex];
-                _idProductoSeleccionado = (Guid)fila.Cells["Id"].Value;
+
+                _idProductoSeleccionado = Guid.Parse(fila.Cells["Id"].Value.ToString()!);
 
                 txtNombre.Text = fila.Cells["Nombre"].Value.ToString();
                 txtDescripcion.Text = fila.Cells["Descripcion"].Value?.ToString();
                 txtPrecio.Text = fila.Cells["Precio"].Value.ToString();
                 cmbCategoria.Text = fila.Cells["Categoria"].Value.ToString();
                 chkDisponible.Checked = (bool)fila.Cells["EstaDisponible"].Value;
+
+                var imagen = fila.Cells["ImagenUrl"].Value?.ToString();
+
+                _imagenBase64 = imagen ?? "";
+
+                if (!string.IsNullOrEmpty(imagen))
+                {
+                    byte[] imageBytes = Convert.FromBase64String(imagen);
+                    using (var ms = new MemoryStream(imageBytes))
+                    {
+                        pictureBox1.Image = Image.FromStream(ms);
+                    }
+                }
+                else
+                {
+                    pictureBox1.Image = null;
+                }
             }
         }
 
@@ -81,8 +90,9 @@ namespace PedidosForm.UserControls
                     Precio = precio,
                     Categoria = cmbCategoria.Text,
                     EstaDisponible = chkDisponible.Checked,
-                    // AGREGAMOS LA URL DE IMAGEN (El campo que faltaba)
-                    ImagenUrl = "https://via.placeholder.com/150" // URL genérica para que la API valide
+                    ImagenUrl = string.IsNullOrEmpty(_imagenBase64)
+                    ? ""
+                    : _imagenBase64
                 };
 
                 bool exito = await _productoService.CrearProductoAsync(nuevo);
@@ -120,13 +130,15 @@ namespace PedidosForm.UserControls
                 Descripcion = txtDescripcion.Text,
                 Precio = precio,
                 Categoria = cmbCategoria.Text,
-                EstaDisponible = chkDisponible.Checked
+                EstaDisponible = chkDisponible.Checked,
+                ImagenUrl = string.IsNullOrEmpty(_imagenBase64) ? "" : _imagenBase64
             };
 
             if (await _productoService.ActualizarProductoAsync(_idProductoSeleccionado, productoEditado))
             {
                 MessageBox.Show("Producto actualizado.");
                 CargarTablaProductos();
+                LimpiarCampos();
             }
         }
 
@@ -154,20 +166,34 @@ namespace PedidosForm.UserControls
             txtPrecio.Clear();
             cmbCategoria.SelectedIndex = -1;
             chkDisponible.Checked = true;
-            txtNombre.Focus(); // El foco vuelve al inicio para rapidez
+            txtNombre.Focus();
+            pictureBox1.Image = null;
         }
 
         private void txtPrecio_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && (e.KeyChar != '.'))
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != '.')
             {
-                e.Handled = true;
+                e.Handled = true; // Bloquea cualquier otra tecla que no sea numero o punto decimal
             }
+        }
 
-            // Especificamos System.Windows.Forms.TextBox para eliminar la ambigüedad
-            if ((e.KeyChar == '.') && ((sender as System.Windows.Forms.TextBox).Text.IndexOf('.') > -1))
+        private void btnSeleccionarImagen_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog())
             {
-                e.Handled = true;
+                ofd.Filter = "Imágenes|*.jpg;*.jpeg;*.png";
+                ofd.Title = "Seleccionar imagen del producto";
+
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    // Mostrar en PictureBox
+                    pictureBox1.Image = Image.FromFile(ofd.FileName);
+
+                    // Convertir a Base64
+                    byte[] imageBytes = File.ReadAllBytes(ofd.FileName);
+                    _imagenBase64 = Convert.ToBase64String(imageBytes);
+                }
             }
         }
     }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SistemaPedidosYa.Interfaces;
-using SistemaPedidosYa.Schemes;
 using SistemaPedidosYa.Schemes.DTO;
 
 namespace SistemaPedidosYa.Controllers

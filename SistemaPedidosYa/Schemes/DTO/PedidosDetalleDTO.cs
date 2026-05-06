@@ -11,7 +11,7 @@ namespace SistemaPedidosYa.Schemes.DTO
         public string NumeroOrden { get; set; } = string.Empty;
         public string Mesa { get; set; } = string.Empty;
         public string Mesero { get; set; } = string.Empty;
-        public string Estado { get; set; } = string.Empty;  
+        public string Estado { get; set; } = string.Empty;
         public List<ItemPedidoDTO> Items { get; set; } = new List<ItemPedidoDTO>();
         public decimal Subtotal => Items.Sum(i => i.Subtotal);
         public decimal PorcentajeIVA { get; set; } = 0.15m;

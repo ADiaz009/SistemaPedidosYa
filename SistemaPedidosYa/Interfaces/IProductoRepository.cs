@@ -1,5 +1,4 @@
 ﻿using SistemaPedidosYa.Schemes;
-using SistemaPedidosYa.Schemes.DTO;
 
 namespace SistemaPedidosYa.Interfaces
 {

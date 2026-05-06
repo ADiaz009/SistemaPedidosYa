@@ -126,6 +126,7 @@
             Controls.Add(label1);
             Controls.Add(btnIniciarSesion);
             Name = "FrmLogin";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Sistena Diquiri";
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();

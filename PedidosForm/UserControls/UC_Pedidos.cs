@@ -1,15 +1,6 @@
 ﻿using SistemaPedidosYa.WinForms.Models;
 using SistemaPedidosYa.WinForms.Services;
 using SistemaPedidosYa.WinForms.Utils;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace PedidosForm.UserControls
 {
@@ -17,27 +8,34 @@ namespace PedidosForm.UserControls
     {
         private readonly PedidoService _pedidoService = new PedidoService();
         private readonly ProductoService _productoService = new ProductoService();
-        private List<ItemPedidoDTO> _itemsDelPedidoActual = new List<ItemPedidoDTO>();
         private Guid _idPedidoSeleccionado = Guid.Empty;
         public UC_Pedidos()
         {
             InitializeComponent();
             ConfigurarPantalla();
             CargarTablaPedidos();
+            CargarEstados();
+        }
+
+        private void CargarEstados()
+        {
+            cmbEstado.Items.AddRange(new string[]
+            {
+                "Pendiente",
+                "En preparación",
+                "Listo",
+                "Entregado",
+                "Cancelado"
+            });
         }
 
         private void LimpiarCampos()
         {
-            _idPedidoSeleccionado = Guid.Empty; // Resetear ID de selección
-            cmbMesa.SelectedIndex = -1;         // Deseleccionar mesa
-            cmbProducto.SelectedIndex = -1;    // Deseleccionar producto
-            numCantidad.Value = 1;              // Resetear cantidad a 1
-
-            // Si tienes un label de total o algún campo extra, límpialo aquí
-            if (cmbEstado.Visible) cmbEstado.SelectedIndex = -1;
-
-            // Ponemos el foco de nuevo en la mesa para la siguiente orden
-            cmbMesa.Focus();
+            _idPedidoSeleccionado = Guid.Empty;
+            cmbMesa.SelectedIndex = -1;
+            cmbProducto.SelectedIndex = -1;
+            numCantidad.Value = 1;
+            cmbEstado.SelectedIndex = -1;
         }
 
         private async void ConfigurarPantalla()
@@ -52,7 +50,7 @@ namespace PedidosForm.UserControls
             cmbProducto.ValueMember = "Id";
 
             // Mesero actual de la sesión
-            txtMesero.Text = Sesion.UsuarioActual.NombreCompleto;
+            txtMesero.Text = Sesion.UsuarioActual!.NombreCompleto;
             txtMesero.ReadOnly = true;
         }
 
@@ -103,51 +101,111 @@ namespace PedidosForm.UserControls
             }
         }
 
-        private void dgvPedidos_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0)
-            {
-                var fila = dgvPedidos.Rows[e.RowIndex];
-                _idPedidoSeleccionado = (Guid)fila.Cells["Id"].Value; // Guardamos ID para actualizar/borrar
-
-                cmbMesa.Text = fila.Cells["Mesa"].Value.ToString();
-                cmbEstado.Text = fila.Cells["Estado"].Value.ToString();
-            }
-        }
-
         private async void btnModificarOrden_Click(object sender, EventArgs e)
         {
-            if (_idPedidoSeleccionado != Guid.Empty)
+            if (_idPedidoSeleccionado == Guid.Empty)
             {
-                // 1. Creamos el objeto que el Service espera recibir
-                var pedidoActualizado = new PedidosDetalleDTO
-                {
-                    Id = _idPedidoSeleccionado,
-                    Estado = cmbEstado.Text // Aquí es donde viaja el nuevo estado
-                };
+                MessageBox.Show("Seleccione un pedido.");
+                return;
+            }
 
-                // 2. Ahora enviamos el objeto 'pedidoActualizado', no solo el string
-                if (await _pedidoService.ActualizarEstadoAsync(_idPedidoSeleccionado, pedidoActualizado))
-                {
-                    MessageBox.Show("Estado actualizado.");
-                    CargarTablaPedidos();
-                }
+            if (cmbProducto.SelectedItem == null)
+            {
+                MessageBox.Show("Seleccione un producto.");
+                return;
+            }
+
+            if (!decimal.TryParse(numCantidad.Value.ToString(), out _))
+            {
+                MessageBox.Show("Cantidad inválida.");
+                return;
+            }
+
+            // 🔥 RECONSTRUIR ITEM DESDE LA UI
+            var prod = (ProductoDTO)cmbProducto.SelectedItem;
+
+            var item = new ItemPedidoDTO
+            {
+                ProductoId = prod.Id,
+                ProductoNombre = prod.Nombre,
+                PrecioUnitario = prod.Precio,
+                Categoria = prod.Categoria,
+                Cantidad = (int)numCantidad.Value
+            };
+
+            var pedidoActualizado = new PedidosDetalleDTO
+            {
+                Id = _idPedidoSeleccionado,
+                NumeroOrden = txtNumeroOrden.Text,
+                Mesero = txtMesero.Text,
+                Mesa = cmbMesa.Text,
+                Estado = cmbEstado.Text,
+
+                // 🔥 AQUÍ ESTÁ LA CLAVE
+                Items = new List<ItemPedidoDTO> { item }
+            };
+
+            bool ok = await _pedidoService.ActualizarEstadoAsync(_idPedidoSeleccionado, pedidoActualizado);
+
+            if (ok)
+            {
+                MessageBox.Show("Pedido actualizado correctamente.");
+                CargarTablaPedidos();
+                LimpiarCampos();
             }
             else
             {
-                MessageBox.Show("Por favor, seleccione un pedido de la tabla.");
+                MessageBox.Show("Error al actualizar pedido.");
             }
         }
+
         private async void btnEliminarOrden_Click(object sender, EventArgs e)
         {
-            if (_idPedidoSeleccionado != Guid.Empty)
+            if (_idPedidoSeleccionado == Guid.Empty)
             {
-                if (await _pedidoService.EliminarPedidoAsync(_idPedidoSeleccionado))
+                MessageBox.Show("Seleccione un pedido.");
+                return;
+            }
+
+            var confirm = MessageBox.Show(
+                "¿Eliminar este pedido?",
+                "Confirmar",
+                MessageBoxButtons.YesNo);
+
+            if (confirm == DialogResult.Yes)
+            {
+                bool ok = await _pedidoService.EliminarPedidoAsync(_idPedidoSeleccionado);
+
+                if (ok)
                 {
                     MessageBox.Show("Pedido eliminado.");
                     CargarTablaPedidos();
-                    _idPedidoSeleccionado = Guid.Empty;
+                    LimpiarCampos();
                 }
+            }
+        }
+
+        private void dgvPedidos_CellClick_1(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            var fila = dgvPedidos.Rows[e.RowIndex];
+
+            var pedido = (PedidosDetalleDTO)fila.DataBoundItem;
+
+            _idPedidoSeleccionado = pedido.Id;
+
+            txtNumeroOrden.Text = pedido.NumeroOrden;
+            txtMesero.Text = pedido.Mesero;
+            cmbMesa.Text = pedido.Mesa;
+            cmbEstado.Text = pedido.Estado;
+
+            if (pedido.Items != null && pedido.Items.Count > 0)
+            {
+                var item = pedido.Items.First();
+
+                cmbProducto.SelectedValue = item.ProductoId;
+                numCantidad.Value = item.Cantidad;
             }
         }
     }

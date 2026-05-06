@@ -8,7 +8,7 @@ namespace SistemaPedidosYa.AppContext
         public IMongoDatabase Database { get; }
         public MongoDBContext(IMongoClient mongoCliente, IOptions<MongoDBSettings> options)
         {
-           var settings = options.Value;
+            var settings = options.Value;
             Database = mongoCliente.GetDatabase(settings.DatabaseName);
         }
 

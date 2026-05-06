@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
+﻿using SistemaPedidosYa.WinForms.Models;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
-using SistemaPedidosYa.WinForms.Models; // Asegúrate de que apunte a tus DTOs
 
 namespace SistemaPedidosYa.WinForms.Services
 {
@@ -14,18 +10,16 @@ namespace SistemaPedidosYa.WinForms.Services
         public ProductoService()
         {
             _httpClient = new HttpClient();
-            // Revisa que este puerto coincida con el que lanza tu API en la UNI
-            _httpClient.BaseAddress = new Uri("https://localhost:7086/api/producto");
+            _httpClient.BaseAddress = new Uri("https://localhost:7086/");
         }
-
-        // --- MÉTODOS DEL CRUD ---
 
         public async Task<List<ProductoDTO>> ObtenerTodoAsync()
         {
             try
             {
-                var productos = await _httpClient.GetFromJsonAsync<List<ProductoDTO>>("api/productos");
-                return productos ?? new List<ProductoDTO>();
+                return await _httpClient
+                    .GetFromJsonAsync<List<ProductoDTO>>("api/producto")
+                    ?? new List<ProductoDTO>();
             }
             catch (Exception ex)
             {
@@ -38,8 +32,7 @@ namespace SistemaPedidosYa.WinForms.Services
         {
             try
             {
-                // Enviamos el objeto completo (incluyendo ImagenUrl)
-                var response = await _httpClient.PostAsJsonAsync("api/productos", producto);
+                var response = await _httpClient.PostAsJsonAsync("api/producto", producto);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -53,8 +46,7 @@ namespace SistemaPedidosYa.WinForms.Services
         {
             try
             {
-                // PUT: api/productos/{id}
-                var response = await _httpClient.PutAsJsonAsync($"api/productos/{id}", producto);
+                var response = await _httpClient.PutAsJsonAsync($"api/producto/{id}", producto);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -68,8 +60,7 @@ namespace SistemaPedidosYa.WinForms.Services
         {
             try
             {
-                // DELETE: api/productos/{id}
-                var response = await _httpClient.DeleteAsync($"api/productos/{id}");
+                var response = await _httpClient.DeleteAsync($"api/producto/{id}");
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
