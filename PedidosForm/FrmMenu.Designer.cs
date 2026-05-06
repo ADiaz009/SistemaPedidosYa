@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             groupBox1 = new GroupBox();
+            btnUsuarios = new Button();
             label1 = new Label();
             btnCerrarSesion = new Button();
             btnInventario = new Button();
@@ -40,6 +41,7 @@
             // groupBox1
             // 
             groupBox1.BackColor = Color.FromArgb(128, 128, 255);
+            groupBox1.Controls.Add(btnUsuarios);
             groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(btnCerrarSesion);
             groupBox1.Controls.Add(btnInventario);
@@ -50,6 +52,18 @@
             groupBox1.Size = new Size(200, 575);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
+            // 
+            // btnUsuarios
+            // 
+            btnUsuarios.BackColor = Color.FromArgb(192, 192, 255);
+            btnUsuarios.FlatStyle = FlatStyle.Flat;
+            btnUsuarios.Location = new Point(5, 336);
+            btnUsuarios.Name = "btnUsuarios";
+            btnUsuarios.Size = new Size(185, 62);
+            btnUsuarios.TabIndex = 4;
+            btnUsuarios.Text = "Administrar Usuarios";
+            btnUsuarios.UseVisualStyleBackColor = false;
+            btnUsuarios.Click += btnUsuarios_Click;
             // 
             // label1
             // 
@@ -64,7 +78,7 @@
             // 
             btnCerrarSesion.BackColor = Color.FromArgb(192, 192, 255);
             btnCerrarSesion.FlatStyle = FlatStyle.Flat;
-            btnCerrarSesion.Location = new Point(6, 315);
+            btnCerrarSesion.Location = new Point(6, 438);
             btnCerrarSesion.Name = "btnCerrarSesion";
             btnCerrarSesion.Size = new Size(185, 62);
             btnCerrarSesion.TabIndex = 2;
@@ -76,7 +90,7 @@
             // 
             btnInventario.BackColor = Color.FromArgb(192, 192, 255);
             btnInventario.FlatStyle = FlatStyle.Flat;
-            btnInventario.Location = new Point(5, 226);
+            btnInventario.Location = new Point(5, 235);
             btnInventario.Name = "btnInventario";
             btnInventario.Size = new Size(185, 62);
             btnInventario.TabIndex = 1;
@@ -127,5 +141,6 @@
         private Button btnCerrarSesion;
         private Button btnInventario;
         private Panel pnlContenedor;
+        private Button btnUsuarios;
     }
 }

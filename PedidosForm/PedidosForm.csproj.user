@@ -13,5 +13,8 @@
     <Compile Update="UserControls\UC_Pedidos.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="UserControls\UC_Usuarios.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

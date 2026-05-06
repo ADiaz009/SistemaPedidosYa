@@ -66,5 +66,19 @@ namespace PedidosForm
                 this.Close();
             }
         }
+
+        private void btnUsuarios_Click(object sender, EventArgs e)
+        {
+            if (Sesion.UsuarioActual!.Rol == "Administrador")
+            {
+                AbrirPanelHijo(new UC_Usuarios());
+
+            }
+            else
+            {
+                MessageBox.Show("Acceso denegado. Esta sección es exclusiva para Administradores.",
+                                "Seguridad del Sistema", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+            }
+        }
     }
 }
